@@ -25,7 +25,6 @@ export default function Options({ optionType }) {
     return <AlertBanner />;
   }
 
-  // TODO: replace `null` with ToppingOption when available
   const ItemComponent = optionType === 'scoops' ? ScoopOption : ToppingOption;
   const title = optionType[0].toUpperCase() + optionType.slice(1);
 
