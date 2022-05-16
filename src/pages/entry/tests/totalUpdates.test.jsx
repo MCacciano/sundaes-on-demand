@@ -2,6 +2,7 @@ import { render, screen } from '../../../test-utils/testing-library-utils';
 import userEvent from '@testing-library/user-event';
 
 import Options from '../Options';
+import OrderEntry from '../OrderEntry';
 
 test('update scoop subtotal when the scoops change', async () => {
   render(<Options optionType='scoops' />);
@@ -39,4 +40,62 @@ test('update topping subtotal when the toppings change', async () => {
 
   userEvent.click(fudgeCheckbox);
   expect(toppingsTotal).toHaveTextContent('1.50');
+});
+
+describe('grand total', () => {
+  test('updates properly if scoop is added first', async () => {
+    render(<OrderEntry />);
+
+    const grandTotal = screen.getByRole('heading', { name: /grand total: \$/i });
+    expect(grandTotal).toHaveTextContent('0.00');
+
+    const vanillaInput = await screen.findByRole('spinbutton', { name: /vanilla/i });
+    userEvent.clear(vanillaInput);
+    userEvent.type(vanillaInput, '2');
+
+    expect(grandTotal).toHaveTextContent('4.00');
+
+    const cherriesCheckbox = await screen.findByRole('checkbox', { name: /cherries/i });
+    userEvent.click(cherriesCheckbox);
+
+    expect(grandTotal).toHaveTextContent('5.50');
+  });
+
+  test('updates properly if topping is added first', async () => {
+    render(<OrderEntry />);
+
+    const grandTotal = screen.getByRole('heading', { name: /grand total: \$/i });
+    expect(grandTotal).toHaveTextContent('0.00');
+
+    const cherriesCheckbox = await screen.findByRole('checkbox', { name: /cherries/i });
+    userEvent.click(cherriesCheckbox);
+
+    const vanillaInput = await screen.findByRole('spinbutton', { name: /vanilla/i });
+    userEvent.clear(vanillaInput);
+    userEvent.type(vanillaInput, '2');
+
+    expect(grandTotal).toHaveTextContent('5.50');
+  });
+
+  test('updates properly if item is removed', async () => {
+    render(<OrderEntry />);
+
+    const grandTotal = screen.getByRole('heading', { name: /grand total: \$/i });
+    expect(grandTotal).toHaveTextContent('0.00');
+
+    const vanillaInput = await screen.findByRole('spinbutton', { name: /vanilla/i });
+    userEvent.clear(vanillaInput);
+    userEvent.type(vanillaInput, '2');
+
+    userEvent.clear(vanillaInput);
+    userEvent.type(vanillaInput, '1');
+
+    const cherriesCheckbox = await screen.findByRole('checkbox', { name: /cherries/i });
+    userEvent.click(cherriesCheckbox);
+    expect(grandTotal).toHaveTextContent('3.50');
+
+    userEvent.click(cherriesCheckbox);
+
+    expect(grandTotal).toHaveTextContent('2.00');
+  });
 });

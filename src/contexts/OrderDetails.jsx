@@ -1,14 +1,6 @@
 import { createContext, useContext, useState, useMemo, useEffect } from 'react';
 import { pricePerItem } from '../constants';
-
-// format number as currency
-function formatCurrency(amount) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from '../utils';
 
 const OrderDetails = createContext();
 
@@ -57,7 +49,15 @@ export function OrderDetailsProvider(props) {
         return newOptionCounts;
       });
     }
-    return [{ ...optionCounts, totals }, updateItemCount];
+
+    function resetOrder() {
+      setOptionCounts({
+        scoops: new Map(),
+        toppings: new Map(),
+      });
+    }
+
+    return [{ ...optionCounts, totals }, updateItemCount, resetOrder];
   }, [optionCounts, totals]);
 
   useEffect(() => {
